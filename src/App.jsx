@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./index.css";
 
 const App = () => {
@@ -7,12 +7,15 @@ const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(10);
 
   const isButtonDisabled = !name || !topic;
 
   const questions = {
     Javascript: [
       {
+        id: "q1",
         question:
           "Which method can be used to round a number to the nearest integer in JavaScript?",
         options: [
@@ -23,6 +26,7 @@ const App = () => {
         ],
       },
       {
+        id: "q2",
         question: "What is the correct syntax for a function in JavaScript?",
         options: [
           "function myFunction() { }",
@@ -30,6 +34,24 @@ const App = () => {
           "func myFunction() { }",
           "myFunction function() { }",
         ],
+      },
+      {
+        id: "q3",
+        question:
+          "What is the correct syntax for referring to an external script called 'script.js'?",
+        options: [
+          "A. <script name='script.js'>",
+          "B. <script href='script.js'>",
+          "C. <script src='script.js'>",
+          "D. <script file='script.js'>",
+        ],
+        correctAnswer: "C",
+      },
+      {
+        id: "q4",
+        question: "Which company developed JavaScript?",
+        options: ["A. Microsoft", "B. Netscape", "C. Google", "D. Mozilla"],
+        correctAnswer: "B",
       },
     ],
     "React.js": [
@@ -43,40 +65,128 @@ const App = () => {
         ],
       },
     ],
-    Flutter: [
+    GenAi: [
       {
-        question: "What is a hook in React?",
+        id: "q1",
+        question: "What is the main purpose of General AI?",
         options: [
-          "A function that lets you hook into React state and lifecycle features.",
-          "A component in React.",
-          "A library to manage routing in React.",
-          "A styling method in React.",
+          "A. To simulate human intelligence in machines",
+          "B. To enhance machine learning algorithms",
+          "C. To make machines learn from data",
+          "D. To automate repetitive tasks",
         ],
+        correctAnswer: "A",
+      },
+      {
+        id: "q2",
+        question: "Which of the following is a feature of General AI?",
+        options: [
+          "A. Narrow domain-specific problem solving",
+          "B. Ability to perform tasks beyond human capabilities",
+          "C. Adaptation to any intellectual task a human can do",
+          "D. Inability to learn from data",
+        ],
+        correctAnswer: "C",
+      },
+      {
+        id: "q3",
+        question: "Which technology is used in the development of General AI?",
+        options: [
+          "A. Deep Learning",
+          "B. Reinforcement Learning",
+          "C. Natural Language Processing (NLP)",
+          "D. All of the above",
+        ],
+        correctAnswer: "D",
+      },
+      {
+        id: "q4",
+        question: "What differentiates General AI from Narrow AI?",
+        options: [
+          "A. General AI can learn from experience, while Narrow AI is designed for specific tasks",
+          "B. General AI focuses on specific problem-solving, while Narrow AI learns from experience",
+          "C. There is no difference",
+          "D. General AI can only be used for specific tasks",
+        ],
+        correctAnswer: "A",
       },
     ],
-    Vue: [
+    NextJS: [
       {
-        question: "What is a hook in React?",
+        id: "q1",
+        question:
+          "What is the primary use of the 'getServerSideProps' function in Next.js?",
         options: [
-          "A function that lets you hook into React state and lifecycle features.",
-          "A component in React.",
-          "A library to manage routing in React.",
-          "A styling method in React.",
+          "A. Fetch data at build time",
+          "B. Fetch data at request time",
+          "C. Fetch data from client-side",
+          "D. Fetch data from APIs only",
         ],
+        correctAnswer: "B",
+      },
+      {
+        id: "q2",
+        question: "Which Next.js feature helps in optimizing image loading?",
+        options: [
+          "A. next/image",
+          "B. next/optimize",
+          "C. next/lazyload",
+          "D. next/prefetch",
+        ],
+        correctAnswer: "A",
+      },
+      {
+        id: "q3",
+        question:
+          "What is the primary purpose of a _document.js file in Next.js?",
+        options: [
+          "A. To customize the HTML structure for the entire app",
+          "B. To customize global styles",
+          "C. To handle server-side rendering",
+          "D. To manage environment variables",
+        ],
+        correctAnswer: "A",
+      },
+      {
+        id: "q4",
+        question: "How can you create dynamic routes in Next.js?",
+        options: [
+          "A. Using getInitialProps",
+          "B. Using folder and file names with brackets []",
+          "C. Using next/router API",
+          "D. Using custom server configuration",
+        ],
+        correctAnswer: "B",
       },
     ],
   };
 
+  useEffect(() => {
+    if (isQuizStarted && timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0) {
+      handleNext();
+    }
+  }, [isQuizStarted, timeLeft]);
+
   const handleStart = () => {
     setIsQuizStarted(true);
     setCurrentQuestion(0); // Reset to the first question when starting the quiz
+    setTimeLeft(10);
   };
 
   const handleNext = () => {
     const totalQuestions = questions[topic].length;
     if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion(currentQuestion + 1);
+      setSelectedAnswer(null); // Reset selected answer
+      setTimeLeft(10); // Reset the timer for the next question
     }
+  };
+
+  const skipQuestion = () => {
+    handleNext(); // Skip to the next question
   };
 
   return (
@@ -171,7 +281,9 @@ const App = () => {
             <div className="text-lg font-bold text-gray-700">
               {currentQuestion + 1} / {questions[topic].length}
             </div>
-            <div className="text-lg font-bold text-gray-700">0:09</div>
+            <div className="text-lg font-bold text-gray-700">
+              0:{timeLeft.toString().padStart(2, "0")}
+            </div>
           </div>
 
           <div className="w-full h-2 bg-gray-200 rounded mb-4">
@@ -197,6 +309,9 @@ const App = () => {
                       type="radio"
                       name="option"
                       id={`option-${index}`}
+                      value={option}
+                      checked={selectedAnswer === option}
+                      onChange={() => setSelectedAnswer(option)}
                       className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
                     />
                     <label
@@ -214,11 +329,19 @@ const App = () => {
           <div className="flex justify-between">
             <button
               onClick={handleNext}
-              className="bg-pink-600 text-white py-2 px-4 rounded hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              disabled={!selectedAnswer}
+              className={`py-2 px-4 rounded font-bold ${
+                selectedAnswer
+                  ? "bg-pink-600 text-white hover:bg-pink-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } focus:outline-none focus:ring-2 focus:ring-pink-500`}
             >
               Next
             </button>
-            <button className="text-gray-700 border border-gray-300 py-2 px-4 rounded hover:bg-gray-200 focus:outline-none">
+            <button
+              onClick={skipQuestion}
+              className="text-gray-700 border border-gray-300 py-2 px-4 rounded hover:bg-gray-200 focus:outline-none"
+            >
               Skip this question
             </button>
           </div>
