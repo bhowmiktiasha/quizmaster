@@ -28,10 +28,10 @@ const App = () => {
         question:
           "Which method can be used to round a number to the nearest integer in JavaScript?",
         options: [
-          "This method rounds a number up to the nearest integer, regardless of its decimal part.",
-          "This method rounds a number down to the nearest integer, ignoring the decimal part.",
-          "This method rounds a number to the nearest integer based on its decimal value.",
-          "This method generates a random number between 0 and 1, without rounding.",
+          "A. This method rounds a number up to the nearest integer, regardless of its decimal part.",
+          "B. This method rounds a number down to the nearest integer, ignoring the decimal part.",
+          "C. This method rounds a number to the nearest integer based on its decimal value.",
+          "D. This method generates a random number between 0 and 1, without rounding.",
         ],
         correctAnswer: "C",
       },
@@ -39,10 +39,10 @@ const App = () => {
         id: "q2",
         question: "What is the correct syntax for a function in JavaScript?",
         options: [
-          "function myFunction() { }",
-          "function:myFunction() { }",
-          "func myFunction() { }",
-          "myFunction function() { }",
+          "A. function myFunction() { }",
+          "B. function:myFunction() { }",
+          "C. func myFunction() { }",
+          "D. myFunction function() { }",
         ],
         correctAnswer: "C",
       },
@@ -232,64 +232,93 @@ const App = () => {
     }
   };
 
+ 
+
   // const handleFinish = () => {
-  //   // Calculate score and give feedback
+  //   // Calculate correct, incorrect, and unanswered questions
   //   let correctAnswers = 0;
+  //   let incorrectAnswers = 0;
   //   let unansweredQuestions = 0;
 
   //   questions[topic].forEach((question) => {
   //     if (userAnswers[question.id]) {
   //       if (userAnswers[question.id] === question.correctAnswer) {
   //         correctAnswers++;
+  //       } else {
+  //         incorrectAnswers++;
   //       }
   //     } else {
   //       unansweredQuestions++;
   //     }
   //   });
 
+  //   const totalQuestions = questions[topic].length;
+  //   const scorePercentage = (correctAnswers / totalQuestions) * 100; // Score percentage calculation
+
   //   setScore(correctAnswers);
+  //   setIncorrect(incorrectAnswers); // Set incorrect answers
+  //   setUnanswered(unansweredQuestions); // Set unanswered questions
+  //   setScorePercentage(scorePercentage); // Set score percentage
   //   setQuizFinished(true);
-  //   setUserAnswers({}); //
+  //   setUserAnswers({}); // Reset user answers
+  // };
+
+  // const performanceFeedback = () => {
+  //   if (score === questions[topic].length) {
+  //     return "Great job!";
+  //   } else if (score > questions[topic].length / 2) {
+  //     return "Good work!";
+  //   } else {
+  //     return "Keep Practicing!";
+  //   }
   // };
 
   const handleFinish = () => {
-    // Calculate correct, incorrect, and unanswered questions
     let correctAnswers = 0;
     let incorrectAnswers = 0;
     let unansweredQuestions = 0;
 
-    questions[topic].forEach((question) => {
-      if (userAnswers[question.id]) {
-        if (userAnswers[question.id] === question.correctAnswer) {
-          correctAnswers++;
+    // Loop through all topics and their respective questions
+    Object.keys(questions).forEach((topic) => {
+      questions[topic].forEach((question) => {
+        if (userAnswers[question.id]) {
+          if (userAnswers[question.id] === question.correctAnswer) {
+            correctAnswers++;
+          } else {
+            incorrectAnswers++;
+          }
         } else {
-          incorrectAnswers++;
+          unansweredQuestions++;
         }
-      } else {
-        unansweredQuestions++;
-      }
+      });
     });
 
-    const totalQuestions = questions[topic].length;
-    const scorePercentage = (correctAnswers / totalQuestions) * 100; // Score percentage calculation
+    const totalQuestions = Object.values(questions)
+      .flat()
+      .length; // Total number of questions across all topics
+    const scorePercentage = (correctAnswers / totalQuestions) * 100; // Calculate percentage
 
+    // Set the state values
     setScore(correctAnswers);
-    setIncorrect(incorrectAnswers); // Set incorrect answers
-    setUnanswered(unansweredQuestions); // Set unanswered questions
-    setScorePercentage(scorePercentage); // Set score percentage
+    setIncorrect(incorrectAnswers);
+    setUnanswered(unansweredQuestions);
+    setScorePercentage(scorePercentage);
     setQuizFinished(true);
     setUserAnswers({}); // Reset user answers
   };
 
   const performanceFeedback = () => {
-    if (score === questions[topic].length) {
+    const totalQuestions = Object.values(questions).flat().length;
+
+    if (score === totalQuestions) {
       return "Great job!";
-    } else if (score > questions[topic].length / 2) {
+    } else if (score > totalQuestions / 2) {
       return "Good work!";
     } else {
       return "Keep Practicing!";
     }
   };
+
 
   const skipQuestion = () => {
     handleNext(); // Skip to the next question
@@ -315,7 +344,7 @@ const App = () => {
               QUIZMania
             </span>
           </h1>
-          <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-lg">
+          <div className="w-full max-w-lg bg-white p-10 rounded-lg shadow-lg">
             <div className="mb-4">
               <p className="text-gray-700">
                 Please read all the rules about this quiz before you start.
@@ -398,7 +427,8 @@ const App = () => {
               {scorePercentage.toFixed(2)}%
             </span>
           </h2>
-          <h2 className="text-xl mt-10 text-center font-bold mb-4 text-gray-700">
+          <div className="border-2 rounded-lg mt-10 p-4 w-full justify-center">
+          <h2 className="text-xl mt-4 text-center font-bold mb-4 text-gray-700">
             Out of 10 Questions
           </h2>
           <div className="flex text-center justify-center">
@@ -407,16 +437,17 @@ const App = () => {
             </div>
             &nbsp; &nbsp;
             <div className="text-lg font-bold text-gray-700 mb-4">
-              <span className="text-red-700">{incorrectAnswers}</span>:
+              <span className="text-red-500">{incorrectAnswers}</span>:
               InCorrect
             </div>
             &nbsp;&nbsp;
             <div className="text-lg font-bold text-gray-700 mb-4">
-              {unansweredQuestions}: Unanswered
+            <span className="text-red-300">{unansweredQuestions}</span>: Unanswered
             </div>
           </div>
+          </div>
 
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center mt-14">
             <button
               onClick={() => {
                 setQuizFinished(false); // Reset for new quiz
