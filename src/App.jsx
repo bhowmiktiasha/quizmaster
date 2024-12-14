@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./index.css";
+import LoadMe from "./LoadMe";
 
 const App = () => {
   const [name, setName] = useState("");
@@ -17,6 +18,14 @@ const App = () => {
   const [incorrectAnswers, setIncorrect] = useState(0); // Track incorrect answers
   const [unansweredQuestions, setUnanswered] = useState(0); // Track unanswered questions
   const [scorePercentage, setScorePercentage] = useState(0); // Track score
+  const [isLoading, setisLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setisLoading(false);
+    }, 2000);
+  });
+
 
   const isButtonDisabled = !name || !topic;
 
@@ -299,6 +308,10 @@ const App = () => {
   };
 
   return (
+  <>
+    {isLoading ? (
+      <LoadMe/>
+    ) : (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 p-6">
       {!isQuizStarted ? (
         <>
@@ -565,6 +578,8 @@ const App = () => {
         </div>
       )}
     </div>
+    )}
+    </>
   );
 };
 export default App;
