@@ -18,7 +18,6 @@ const App = () => {
   const [unansweredQuestions, setUnanswered] = useState(0); // Track unanswered questions
   const [scorePercentage, setScorePercentage] = useState(0); // Track score
 
-
   const isButtonDisabled = !name || !topic;
 
   const questions = {
@@ -217,94 +216,56 @@ const App = () => {
     }
   }, [isQuizStarted, timeLeft]);
 
+  const handleAnswerChange = (questionId, selectedOption) => {
+    setUserAnswers((prev) => ({ ...prev, [questionId]: selectedOption }));
+  };
+
   const handleStart = () => {
     setIsQuizStarted(true);
     setCurrentQuestion(0); // Reset to the first question when starting the quiz
     setTimeLeft(10);
   };
 
-  const handleNext = () => {
-    const totalQuestions = questions[topic].length;
-    if (currentQuestion < totalQuestions - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer(null); // Reset selected answer
-      setTimeLeft(10); // Reset the timer for the next question
-    }
-  };
-
- 
-
-  // const handleFinish = () => {
-  //   // Calculate correct, incorrect, and unanswered questions
-  //   let correctAnswers = 0;
-  //   let incorrectAnswers = 0;
-  //   let unansweredQuestions = 0;
-
-  //   questions[topic].forEach((question) => {
-  //     if (userAnswers[question.id]) {
-  //       if (userAnswers[question.id] === question.correctAnswer) {
-  //         correctAnswers++;
-  //       } else {
-  //         incorrectAnswers++;
-  //       }
-  //     } else {
-  //       unansweredQuestions++;
-  //     }
-  //   });
-
-  //   const totalQuestions = questions[topic].length;
-  //   const scorePercentage = (correctAnswers / totalQuestions) * 100; // Score percentage calculation
-
-  //   setScore(correctAnswers);
-  //   setIncorrect(incorrectAnswers); // Set incorrect answers
-  //   setUnanswered(unansweredQuestions); // Set unanswered questions
-  //   setScorePercentage(scorePercentage); // Set score percentage
-  //   setQuizFinished(true);
-  //   setUserAnswers({}); // Reset user answers
-  // };
-
-  // const performanceFeedback = () => {
-  //   if (score === questions[topic].length) {
-  //     return "Great job!";
-  //   } else if (score > questions[topic].length / 2) {
-  //     return "Good work!";
-  //   } else {
-  //     return "Keep Practicing!";
-  //   }
-  // };
-
   const handleFinish = () => {
     let correctAnswers = 0;
     let incorrectAnswers = 0;
     let unansweredQuestions = 0;
 
-    // Loop through all topics and their respective questions
-    Object.keys(questions).forEach((topic) => {
-      questions[topic].forEach((question) => {
-        if (userAnswers[question.id]) {
-          if (userAnswers[question.id] === question.correctAnswer) {
-            correctAnswers++;
-          } else {
-            incorrectAnswers++;
-          }
+    questions[topic].forEach((question) => {
+      const userAnswer = userAnswers[question.id];
+      if (userAnswer) {
+        if (userAnswer === question.correctAnswer) {
+          correctAnswers++;
         } else {
-          unansweredQuestions++;
+          incorrectAnswers++;
         }
-      });
+      } else {
+        unansweredQuestions++;
+      }
     });
 
-    const totalQuestions = Object.values(questions)
-      .flat()
-      .length; // Total number of questions across all topics
-    const scorePercentage = (correctAnswers / totalQuestions) * 100; // Calculate percentage
+    const totalQuestions = questions[topic].length;
+    const percentage = (correctAnswers / totalQuestions) * 100;
 
-    // Set the state values
     setScore(correctAnswers);
     setIncorrect(incorrectAnswers);
     setUnanswered(unansweredQuestions);
-    setScorePercentage(scorePercentage);
+    setScorePercentage(percentage);
     setQuizFinished(true);
-    setUserAnswers({}); // Reset user answers
+  };
+
+  const handleNext = () => {
+    const totalQuestions = questions[topic].length;
+    if (selectedAnswer) {
+      handleAnswerChange(questions[topic][currentQuestion].id, selectedAnswer);
+    }
+    if (currentQuestion < totalQuestions - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+      setSelectedAnswer(null); // Reset selected answer
+      setTimeLeft(10); // Reset the timer for the next question
+    } else {
+      handleFinish(); // Automatically finish quiz if it's the last question
+    }
   };
 
   const performanceFeedback = () => {
@@ -319,7 +280,6 @@ const App = () => {
     }
   };
 
-
   const skipQuestion = () => {
     handleNext(); // Skip to the next question
   };
@@ -332,6 +292,10 @@ const App = () => {
     setUserAnswers({}); // Clear answers
     setScore(0); // Reset score
     setTopic(""); // Reset topic selection
+  };
+
+  const handleAnswerSelection = (answer) => {
+    setSelectedAnswer(answer);
   };
 
   return (
@@ -428,23 +392,24 @@ const App = () => {
             </span>
           </h2>
           <div className="border-2 rounded-lg mt-10 p-4 w-full justify-center">
-          <h2 className="text-xl mt-4 text-center font-bold mb-4 text-gray-700">
-            Out of 10 Questions
-          </h2>
-          <div className="flex text-center justify-center">
-            <div className="text-lg font-bold text-gray-700 mb-4">
-              <span className="text-green-700">{score}</span>: Correct
+            <h2 className="text-xl mt-4 text-center font-bold mb-4 text-gray-700">
+              Out of 10 Questions
+            </h2>
+            <div className="flex text-center justify-center">
+              <div className="text-lg font-bold text-gray-700 mb-4">
+                <span className="text-green-700">{score}</span>: Correct
+              </div>
+              &nbsp; &nbsp;
+              <div className="text-lg font-bold text-gray-700 mb-4">
+                <span className="text-red-500">{incorrectAnswers}</span>:
+                InCorrect
+              </div>
+              &nbsp;&nbsp;
+              <div className="text-lg font-bold text-gray-700 mb-4">
+                <span className="text-red-300">{unansweredQuestions}</span>:
+                Unanswered
+              </div>
             </div>
-            &nbsp; &nbsp;
-            <div className="text-lg font-bold text-gray-700 mb-4">
-              <span className="text-red-500">{incorrectAnswers}</span>:
-              InCorrect
-            </div>
-            &nbsp;&nbsp;
-            <div className="text-lg font-bold text-gray-700 mb-4">
-            <span className="text-red-300">{unansweredQuestions}</span>: Unanswered
-            </div>
-          </div>
           </div>
 
           <div className="flex justify-center mt-14">
@@ -504,7 +469,7 @@ const App = () => {
               {questions[topic][currentQuestion].question}
             </h2>
             <ul className="space-y-4">
-              {questions[topic][currentQuestion].options.map(
+              {/* {questions[topic][currentQuestion].options.map(
                 (option, index) => (
                   <li key={index} className="flex items-center">
                     <input
@@ -519,6 +484,27 @@ const App = () => {
                     <label
                       htmlFor={`option-${index}`}
                       className="ml-3 text-gray-700 text-sm"
+                    >
+                      {option}
+                    </label>
+                  </li>
+                )
+              )} */}
+              {questions[topic][currentQuestion].options.map(
+                (option, index) => (
+                  <li key={index} className="flex items-center">
+                    <input
+                      type="radio"
+                      id={`option-${index}`}
+                      name={`question-${currentQuestion}`}
+                      value={option}
+                      checked={selectedAnswer === option}
+                      onChange={() => handleAnswerSelection(option)}
+                      className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
+                    />
+                    <label
+                      className="ml-3 text-gray-700 text-sm"
+                      htmlFor={`option-${index}`}
                     >
                       {option}
                     </label>
