@@ -305,7 +305,7 @@ const App = () => {
           <h1 className="text-3xl font-bold mb-4 text-white">
             Welcome to{" "}
             <span style={{ color: "#b33b72", fontWeight: "bold" }}>
-              QUIZMania
+              QUIZZy
             </span>
           </h1>
           <div className="w-full max-w-lg bg-white p-10 rounded-lg shadow-lg">
@@ -337,9 +337,9 @@ const App = () => {
               <label className="block text-gray-700 mb-2">
                 Please select a topic to continue
               </label>
-              <div className="flex space-x-4">
+              <div className="flex flex-wrap sm:flex-row flex-col space-x-4 sm:space-x-4 sm:space-y-0 space-y-6">
                 {Object.keys(questions).map((t) => (
-                  <div key={t}>
+                  <div key={t} className="w-full sm:w-auto">
                     <input
                       type="radio"
                       id={t}
@@ -435,7 +435,7 @@ const App = () => {
       ) : (
         <div className="w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
           <header className="w-full flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-pink-600">QUIZMania</h1>
+            <h1 className="text-2xl font-bold text-pink-600">QUIZZy</h1>
             <button
               onClick={handleExitQuiz}
               className="text-pink-600 border border-pink-600 py-1 px-4 rounded hover:bg-pink-600 hover:text-white"
