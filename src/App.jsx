@@ -10,6 +10,15 @@ const App = () => {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [timeLeft, setTimeLeft] = useState(10);
 
+  const [userAnswers, setUserAnswers] = useState({}); // Store user answers
+  const [quizFinished, setQuizFinished] = useState(false); // Track if quiz is finished
+  const [score, setScore] = useState(0);
+
+  const [incorrectAnswers, setIncorrect] = useState(0); // Track incorrect answers
+  const [unansweredQuestions, setUnanswered] = useState(0); // Track unanswered questions
+  const [scorePercentage, setScorePercentage] = useState(0); // Track score
+
+
   const isButtonDisabled = !name || !topic;
 
   const questions = {
@@ -24,6 +33,7 @@ const App = () => {
           "This method rounds a number to the nearest integer based on its decimal value.",
           "This method generates a random number between 0 and 1, without rounding.",
         ],
+        correctAnswer: "C",
       },
       {
         id: "q2",
@@ -34,6 +44,7 @@ const App = () => {
           "func myFunction() { }",
           "myFunction function() { }",
         ],
+        correctAnswer: "C",
       },
       {
         id: "q3",
@@ -56,13 +67,49 @@ const App = () => {
     ],
     "React.js": [
       {
-        question: "What is a hook in React?",
+        id: "q1",
+        question: "What is the main purpose of React?",
         options: [
-          "A function that lets you hook into React state and lifecycle features.",
-          "A component in React.",
-          "A library to manage routing in React.",
-          "A styling method in React.",
+          "A. To build mobile apps",
+          "B. To create single-page applications with a responsive user interface",
+          "C. To manage backend databases",
+          "D. To provide a set of predefined UI components",
         ],
+        correctAnswer: "B",
+      },
+      {
+        id: "q2",
+        question: "Which of the following is true about React components?",
+        options: [
+          "A. Components cannot be reused",
+          "B. Components are functions or classes that return a UI",
+          "C. Components are written in CSS",
+          "D. Components can only be defined in the App.js file",
+        ],
+        correctAnswer: "B",
+      },
+
+      {
+        id: "q3",
+        question: "What is JSX in React?",
+        options: [
+          "A. A JavaScript function",
+          "B. A syntax extension for JavaScript that looks similar to HTML",
+          "C. A type of React component",
+          "D. A JavaScript library for animation",
+        ],
+        correctAnswer: "B",
+      },
+      {
+        id: "q4",
+        question: "What is the purpose of useState hook in React?",
+        options: [
+          "A. To manage side effects in components",
+          "B. To store a mutable value that persists across re-renders",
+          "C.To handle component lifecycle methods",
+          "D. To define prop types for components",
+        ],
+        correctAnswer: "B",
       },
     ],
     GenAi: [
@@ -185,8 +232,77 @@ const App = () => {
     }
   };
 
+  // const handleFinish = () => {
+  //   // Calculate score and give feedback
+  //   let correctAnswers = 0;
+  //   let unansweredQuestions = 0;
+
+  //   questions[topic].forEach((question) => {
+  //     if (userAnswers[question.id]) {
+  //       if (userAnswers[question.id] === question.correctAnswer) {
+  //         correctAnswers++;
+  //       }
+  //     } else {
+  //       unansweredQuestions++;
+  //     }
+  //   });
+
+  //   setScore(correctAnswers);
+  //   setQuizFinished(true);
+  //   setUserAnswers({}); //
+  // };
+
+  const handleFinish = () => {
+    // Calculate correct, incorrect, and unanswered questions
+    let correctAnswers = 0;
+    let incorrectAnswers = 0;
+    let unansweredQuestions = 0;
+
+    questions[topic].forEach((question) => {
+      if (userAnswers[question.id]) {
+        if (userAnswers[question.id] === question.correctAnswer) {
+          correctAnswers++;
+        } else {
+          incorrectAnswers++;
+        }
+      } else {
+        unansweredQuestions++;
+      }
+    });
+
+    const totalQuestions = questions[topic].length;
+    const scorePercentage = (correctAnswers / totalQuestions) * 100; // Score percentage calculation
+
+    setScore(correctAnswers);
+    setIncorrect(incorrectAnswers); // Set incorrect answers
+    setUnanswered(unansweredQuestions); // Set unanswered questions
+    setScorePercentage(scorePercentage); // Set score percentage
+    setQuizFinished(true);
+    setUserAnswers({}); // Reset user answers
+  };
+
+  const performanceFeedback = () => {
+    if (score === questions[topic].length) {
+      return "Great job!";
+    } else if (score > questions[topic].length / 2) {
+      return "Good work!";
+    } else {
+      return "Keep Practicing!";
+    }
+  };
+
   const skipQuestion = () => {
     handleNext(); // Skip to the next question
+  };
+
+  const handleExitQuiz = () => {
+    setIsQuizStarted(false); // Reset quiz state
+    setQuizFinished(false); // Reset finished state
+    setCurrentQuestion(0); // Go back to the first question
+    setTimeLeft(10); // Reset the timer
+    setUserAnswers({}); // Clear answers
+    setScore(0); // Reset score
+    setTopic(""); // Reset topic selection
   };
 
   return (
@@ -268,11 +384,66 @@ const App = () => {
             </button>
           </div>
         </>
+      ) : quizFinished ? (
+        <div className="w-full max-w-xl bg-white px-6 py-12 rounded-lg bg-slate-100 shadow-lg">
+          <h1 className="text-lg font-bold mb-4 text-center text-gray-700">
+            You have successfully completed the quiz
+          </h1>
+          <div className="text-4xl justify-center text-center font-bold text-pink-500 mb-4">
+            {performanceFeedback()}
+          </div>
+          <h2 className="text-xl text-center font-bold mb-4 text-gray-700">
+            Your Score -{" "}
+            <span className="text-green-700">
+              {scorePercentage.toFixed(2)}%
+            </span>
+          </h2>
+          <h2 className="text-xl mt-10 text-center font-bold mb-4 text-gray-700">
+            Out of 10 Questions
+          </h2>
+          <div className="flex text-center justify-center">
+            <div className="text-lg font-bold text-gray-700 mb-4">
+              <span className="text-green-700">{score}</span>: Correct
+            </div>
+            &nbsp; &nbsp;
+            <div className="text-lg font-bold text-gray-700 mb-4">
+              <span className="text-red-700">{incorrectAnswers}</span>:
+              InCorrect
+            </div>
+            &nbsp;&nbsp;
+            <div className="text-lg font-bold text-gray-700 mb-4">
+              {unansweredQuestions}: Unanswered
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-10">
+            <button
+              onClick={() => {
+                setQuizFinished(false); // Reset for new quiz
+                setCurrentQuestion(0);
+                setTimeLeft(10);
+                setScore(0);
+              }}
+              className="bg-pink-600 text-white py-2 px-4 rounded hover:bg-pink-700"
+            >
+              Restart Quiz
+            </button>
+            <button
+              onClick={handleExitQuiz}
+              className="bg-pink-600 text-white py-2 ml-5 px-4 rounded hover:bg-pink-700"
+            >
+              Home Page
+            </button>
+          </div>
+        </div>
       ) : (
         <div className="w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
           <header className="w-full flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-pink-600">QUIZMania</h1>
-            <button className="text-pink-600 border border-pink-600 py-1 px-4 rounded hover:bg-pink-600 hover:text-white">
+            <button
+              onClick={handleExitQuiz}
+              className="text-pink-600 border border-pink-600 py-1 px-4 rounded hover:bg-pink-600 hover:text-white"
+            >
               Exit Quiz
             </button>
           </header>
@@ -327,17 +498,26 @@ const App = () => {
           </div>
 
           <div className="flex justify-between">
-            <button
-              onClick={handleNext}
-              disabled={!selectedAnswer}
-              className={`py-2 px-4 rounded font-bold ${
-                selectedAnswer
-                  ? "bg-pink-600 text-white hover:bg-pink-700"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } focus:outline-none focus:ring-2 focus:ring-pink-500`}
-            >
-              Next
-            </button>
+            {currentQuestion < questions[topic].length - 1 ? (
+              <button
+                onClick={handleNext}
+                disabled={!selectedAnswer}
+                className={`py-2 px-4 rounded font-bold ${
+                  selectedAnswer
+                    ? "bg-pink-600 text-white hover:bg-pink-700"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                } focus:outline-none focus:ring-2 focus:ring-pink-500`}
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={handleFinish}
+                className="bg-pink-600 text-white py-2 px-4 rounded hover:bg-pink-700"
+              >
+                Finish
+              </button>
+            )}
             <button
               onClick={skipQuestion}
               className="text-gray-700 border border-gray-300 py-2 px-4 rounded hover:bg-gray-200 focus:outline-none"
@@ -353,7 +533,7 @@ const App = () => {
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-2xl font-bold mb-4">Quiz Rules</h2>
             <ul className="list-disc pl-5 text-gray-700 mb-4">
-              <li>Each question has a time limit of 30 seconds.</li>
+              <li>Each question has a time limit of 10 seconds.</li>
               <li>Once you submit an answer, you cannot change it.</li>
               <li>You must select a topic before starting the quiz.</li>
               <li>Have fun and do your best!</li>
